@@ -19,6 +19,8 @@ add_compile_options(-Wall -Wextra -Werror -Wnon-virtual-dtor -Woverloaded-virtua
 # Outputs
 # Library
 add_library(snoot_lib SHARED ${SNOOT_SOURCES})
+# This probably will need to be changed for Windows
+target_link_libraries(snoot_lib pthread)
 install(TARGETS snoot_lib
       LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
       ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})

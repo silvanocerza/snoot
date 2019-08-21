@@ -2,6 +2,8 @@
 
 #include <filesystem>
 
+#include "reader.h"
+
 using namespace std;
 namespace fs = std::filesystem;
 
@@ -15,5 +17,8 @@ class Logger {
   Logger& operator=(Logger&&) = delete;
   Logger& operator=(const Logger&) = delete;
 
-  void start() const noexcept;
+  void start() noexcept;
+
+ private:
+  Reader _reader;
 };
