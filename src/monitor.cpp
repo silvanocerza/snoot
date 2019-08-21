@@ -1,10 +1,9 @@
 #include <exception>
 #include <iostream>
 
-#include "reader.h"
+#include "monitor.h"
 
-Reader::Reader(const fs::path& file, const cbFun callback)
-    : _callback(callback) {
+Monitor::Monitor(const fs::path& file) {
   switch (fs::status(file).type()) {
     case fs::file_type::fifo:
     case fs::file_type::symlink:
@@ -13,7 +12,7 @@ Reader::Reader(const fs::path& file, const cbFun callback)
       break;
     };
     case fs::file_type::none: {
-      // ¯\_(ツ)_/¯
+      // It could be anything ¯\_(ツ)_/¯
       throw runtime_error("Something really bad has happened!");
     };
     case fs::file_type::not_found: {
@@ -31,6 +30,7 @@ Reader::Reader(const fs::path& file, const cbFun callback)
     };
   }
 
+  // Seek last line on open, we don't really care about previous logs
   _file.open(file, ios::ate | ios::in);
 
   if (not _file.is_open()) {
@@ -39,22 +39,37 @@ Reader::Reader(const fs::path& file, const cbFun callback)
   }
 }
 
-Reader::~Reader() { _file.close(); }
+Monitor::~Monitor() { _file.close(); }
 
-void Reader::start() { _thread.reset(new thread(&Reader::read, this)); }
+void Monitor::start() { _runThread.reset(new thread(&Monitor::run, this)); }
 
-[[noreturn]] void Reader::read() noexcept {
+list<LogItem> Monitor::logData() const noexcept {
+  lock_guard{_logDataMutex};
+  return _logData;
+}
+
+void Monitor::update(const string& line) noexcept {
+  lock_guard{_logDataMutex};
+  // TODO: Maybe we want to delete older items before
+  // creating a new one
+  _logData.emplace_back(LogItem::from(line));
+}
+
+[[noreturn]] void Monitor::run() noexcept {
   string line;
-  // Read and read and read
+  // TODO: We might want to find a way to stop this somehow
   while (true) {
     while (getline(_file, line)) {
-      cerr << "reader " << this_thread::get_id() << endl;
-      _callback(line);
+      if (line.empty()) {
+        continue;
+      }
+      update(line);
     }
 
     if (not _file.eof()) {
       // TODO: Handle this?
     }
+
     // Clear eof state so that we can keep reading
     _file.clear();
   }

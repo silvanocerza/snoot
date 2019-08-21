@@ -3,8 +3,7 @@
 #include <filesystem>
 #include <memory>
 
-#include "processor.h"
-#include "reader.h"
+#include "monitor.h"
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -22,6 +21,5 @@ class Logger {
   void start() noexcept;
 
  private:
-  unique_ptr<Processor> _processor;
-  unique_ptr<Reader> _reader;
+  unique_ptr<Monitor> _monitor;
 };
