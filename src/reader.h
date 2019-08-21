@@ -14,7 +14,7 @@ class Reader {
 
  public:
   Reader(const fs::path& file, const cbFun callback);
-  ~Reader();
+  virtual ~Reader();
 
   Reader(Reader&&) = delete;
   Reader(const Reader&) = delete;

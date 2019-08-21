@@ -1,4 +1,5 @@
 #include <exception>
+#include <iostream>
 
 #include "reader.h"
 
@@ -47,6 +48,7 @@ void Reader::start() { _thread.reset(new thread(&Reader::read, this)); }
   // Read and read and read
   while (true) {
     while (getline(_file, line)) {
+      cerr << "reader " << this_thread::get_id() << endl;
       _callback(line);
     }
 

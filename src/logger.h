@@ -1,7 +1,9 @@
 #pragma once
 
 #include <filesystem>
+#include <memory>
 
+#include "processor.h"
 #include "reader.h"
 
 using namespace std;
@@ -20,5 +22,6 @@ class Logger {
   void start() noexcept;
 
  private:
-  Reader _reader;
+  unique_ptr<Processor> _processor;
+  unique_ptr<Reader> _reader;
 };

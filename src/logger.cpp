@@ -3,12 +3,14 @@
 #include "logger.h"
 
 Logger::Logger(const fs::path logFile)
-    : _reader(logFile, [](string s) { cout << s << endl; }) {}
+    : _processor(new Processor),
+      _reader(new Reader(
+          logFile, [this](const string& s) { _processor->process(s); })) {}
 
 Logger::~Logger() {}
 
 void Logger::start() noexcept {
-  _reader.start();
+  _reader->start();
   // Not the most elegant solution but it works for now
   while (true)
     ;
