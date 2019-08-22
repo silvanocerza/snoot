@@ -1,7 +1,7 @@
 #include <filesystem>
 #include <iostream>
 
-#include "logger.h"
+#include "display.h"
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -9,7 +9,7 @@ namespace fs = std::filesystem;
 int main(int argc, const char* argv[]) {
   // TODO: Takes last argument now, but it must be changed.
   // Also handle empty file name.
-  Logger logger(argv[argc - 1]);
-  logger.start();
+  Display d(argv[argc - 1]);
+  d.run();
   return 0;
 }

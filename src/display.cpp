@@ -14,15 +14,15 @@ Display::Display(const fs::path& logFile) : _monitor(new Monitor(logFile)) {}
   _monitor->start();
 
   while (true) {
-    //    Display::clear();
+    Display::clear();
 
     auto data = _monitor->logData();
 
-    //    cout << "Requests count in last 10 seconds: " << data.size() << '\n';
+    cout << "Requests count in last 10 seconds: " << data.size() << '\n';
 
     // Shows current date and time.
-    //    auto now = time_point_cast<seconds>(system_clock::now());
-    //    cout << date::format("%F %T", now) << '\n';
+    auto now = time_point_cast<seconds>(system_clock::now());
+    cout << date::format("%F %T", now) << '\n';
 
     this_thread::sleep_for(1s);
   }
