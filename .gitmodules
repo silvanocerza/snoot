@@ -1,0 +1,3 @@
+[submodule "3rdparty/date"]
+	path = 3rdparty/date
+	url = git@github.com:HowardHinnant/date.git
