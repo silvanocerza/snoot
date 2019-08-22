@@ -52,22 +52,16 @@ list<LogItem> Monitor::logData() const noexcept {
 void Monitor::update(const string& line) noexcept {
   lock_guard{_logDataMutex};
 
+  // Removes logs older than a certain amount of seconds
   auto now = chrono::system_clock::now();
-  // Returns iterator to first item "younger" than 10 seconds
   auto it =
-      find_if(_logData.cbegin(), _logData.cend(), [now](auto item) -> bool {
+      remove_if(_logData.begin(), _logData.end(), [now](auto item) -> bool {
         auto elapsed = now - item.dateTime;
-        return elapsed < 10s;
+        return elapsed > 10s;
       });
+  _logData.erase(it, _logData.end());
 
-  if (it != _logData.cend()) {
-    // We want to delete only items oldest than 10 seconds,
-    // so we decrement by one, otherwise we would also delete
-    // the first of the "young" logs
-    it--;
-    _logData.erase(_logData.cbegin(), it);
-  }
-
+  // Creates new log
   _logData.emplace_back(LogItem::from(line));
 }
 

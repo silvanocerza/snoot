@@ -1,11 +1,12 @@
 #pragma once
 
 #include <chrono>
-#include <iomanip>
 #include <regex>
 #include <sstream>
 #include <string>
 #include <unordered_map>
+
+#include <date.h>
 
 using namespace std;
 
@@ -25,6 +26,7 @@ enum class Method {
   OPTIONS,
   TRACE,
 };
+
 
 struct LogItem {
   string host;
@@ -67,10 +69,11 @@ struct LogItem {
 
     // chrono::parse would have been great here but it's C++20
     // and I want to stay at C++17 to ease compilation
-    tm time;
+    chrono::system_clock::time_point dateTime;
+    stringstream dateStream(match.str(4));
+    dateStream.imbue(locale(""));
     // The date format could be made configurable
-    stringstream(match.str(5)) >> get_time(&time, "%d/%b/%Y:%H:%M:%S %z");
-    auto dateTime = chrono::system_clock::from_time_t(mktime(&time));
+    dateStream >> date::parse("%d/%b/%Y:%T %z", dateTime);
 
     auto method = methods.at(match.str(5));
     auto resource = match.str(6);
