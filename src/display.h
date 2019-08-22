@@ -24,4 +24,7 @@ class Display {
   unique_ptr<Monitor> _monitor;
 
   static void clear() noexcept;
+  void printHitsTable(list<LogItem> logs) const noexcept;
+
+  static constexpr unsigned int HITS_TABLE_ROWS = 12;
 };
