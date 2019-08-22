@@ -5,7 +5,15 @@
 
 
 METHODS=("GET" "HEAD" "POST" "PUT" "DELETE" "CONNECT" "OPTIONS" "TRACE")
-RESOURCES=("/report" "/api" "/api/user")
+RESOURCES=(
+    "/report"
+    "/api"
+    "/api/user"
+    "/docs"
+    "/docs/api"
+    "/docs/api/tutorial"
+    "/docs/api/reference"
+)
 STATUSES=("200" "202" "400" "404" "500")
 
 # Returns a random element from the passed argument
