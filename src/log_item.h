@@ -76,7 +76,13 @@ struct LogItem {
     dateStream >> date::parse("%d/%b/%Y:%T %z", dateTime);
 
     auto method = methods.at(match.str(5));
+
     auto resource = match.str(6);
+    auto separatorPosition = resource.find_first_of('/', 1);
+    if (separatorPosition != string::npos) {
+      resource = resource.substr(0, separatorPosition);
+    }
+
     auto protocol = match.str(7);
     auto status = atoi(match.str(8).c_str());
     auto size = atoi(match.str(9).c_str());
