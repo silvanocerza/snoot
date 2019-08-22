@@ -28,7 +28,12 @@ install(TARGETS snoot_lib
 
 # Executable
 add_executable(${PROJECT_NAME} "main.cpp")
-target_include_directories(${PROJECT_NAME} PRIVATE src)
+target_include_directories(
+    ${PROJECT_NAME}
+    PRIVATE
+    src
+    3rdparty/args/
+)
 
 target_link_libraries(${PROJECT_NAME} snoot_lib)
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})

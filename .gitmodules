@@ -1,3 +1,6 @@
 [submodule "3rdparty/date"]
 	path = 3rdparty/date
 	url = git@github.com:HowardHinnant/date.git
+[submodule "3rdparty/args"]
+	path = 3rdparty/args
+	url = git@github.com:Taywee/args.git
