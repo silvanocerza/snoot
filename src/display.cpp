@@ -22,7 +22,7 @@ Display::Display(const fs::path& logFile, unsigned long hitsThreshold,
     Display::clear();
     auto now = time_point_cast<seconds>(system_clock::now());
 
-    auto logs = _monitor->logData();
+    auto logs = _monitor->logs();
 
     // TODO: This is not printings last 10 seconds
     // logs anymore, fix it

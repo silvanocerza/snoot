@@ -5,4 +5,5 @@ macro(_snoot_test TEST_NAME)
   add_test(${TEST_NAME} ${TEST_NAME})
 endmacro()
 
- _snoot_test(log_item_test log_item_test.cpp)
+_snoot_test(log_item_test log_item_test.cpp)
+_snoot_test(monitor_test monitor_test.cpp)

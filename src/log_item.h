@@ -27,7 +27,6 @@ enum class Method {
   TRACE,
 };
 
-
 struct LogItem {
   string host;
   string rfc931;
@@ -71,10 +70,13 @@ struct LogItem {
     // and I want to stay at C++17 to ease compilation
     chrono::system_clock::time_point dateTime;
     stringstream dateStream(match.str(4));
+    // We use the system locale to parse the date
     dateStream.imbue(locale(""));
     // The date format could be made configurable
+    // TODO: Handle parsing failure
     dateStream >> date::parse("%d/%b/%Y:%T %z", dateTime);
 
+    // TODO: Handle bogus methods
     auto method = methods.at(match.str(5));
 
     auto resource = match.str(6);

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <chrono>
 #include <filesystem>
 #include <fstream>
@@ -38,11 +39,14 @@ class Monitor {
   Monitor& operator=(const Monitor&) = delete;
 
   void start();
+  void stop();
 
-  list<LogItem> logData() const noexcept;
+  list<LogItem> logs() const noexcept;
   list<Alert> alerts() const noexcept;
 
  private:
+  atomic<bool> _isRunning;
+
   unsigned long _alertThreshold;
   chrono::seconds _alertDuration;
 
@@ -53,9 +57,12 @@ class Monitor {
 
   unique_ptr<thread> _runThread;
   ifstream _file;
-  list<LogItem> _logData;
-  mutable mutex _logDataMutex;
+  list<LogItem> _logs;
+  mutable mutex _logsMutex;
 
-  [[noreturn]] void run() noexcept;
-  void update(const string& line) noexcept;
+  void run() noexcept;
+
+  void eraseOldLogs(const chrono::seconds& threshold) noexcept;
+  void updateLogs(const string& line) noexcept;
+  void updateAlert() noexcept;
 };

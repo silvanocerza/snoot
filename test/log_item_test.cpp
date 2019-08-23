@@ -1,5 +1,7 @@
 #include "../src/log_item.h"
 
+#include "utils.h"
+
 #define CATCH_CONFIG_MAIN
 #include <catch.hpp>
 
@@ -7,11 +9,11 @@ using namespace chrono;
 
 TEST_CASE("LogItem") {
   SECTION("Creation from valid log string") {
-    auto logString =
-        "127.0.0.1 - alien "
-        "[22/ago/2019:12:17:25 +0200] "
-        "\"GET /report HTTP/1.0\" "
-        "200 25";
+    auto dateTime = toSystemLocale("22/Aug/2019:12:17:25 +0200");
+
+    auto logString = "127.0.0.1 - alien [" + dateTime +
+                     "] \"GET /report HTTP/1.0\" "
+                     "200 25";
 
     auto log = LogItem::from(logString);
 
@@ -28,11 +30,11 @@ TEST_CASE("LogItem") {
   }
 
   SECTION("Creation from log string with deep resource") {
-    auto logString =
-        "127.0.0.1 - alien "
-        "[22/ago/2019:12:17:25 +0200] "
-        "\"GET /api/user HTTP/1.0\" "
-        "200 25";
+    auto dateTime = toSystemLocale("22/Aug/2019:12:17:25 +0200");
+
+    auto logString = "127.0.0.1 - alien [" + dateTime +
+                     "] \"GET /api/user HTTP/1.0\" "
+                     "200 25";
 
     auto log = LogItem::from(logString);
 

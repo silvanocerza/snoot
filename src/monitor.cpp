@@ -44,13 +44,27 @@ Monitor::Monitor(const fs::path& file, unsigned long hitsThreshold,
   }
 }
 
-Monitor::~Monitor() { _file.close(); }
+Monitor::~Monitor() {
+  stop();
+  _file.close();
+}
 
-void Monitor::start() { _runThread.reset(new thread(&Monitor::run, this)); }
+void Monitor::start() {
+  _isRunning = true;
+  _runThread.reset(new thread(&Monitor::run, this));
+}
 
-list<LogItem> Monitor::logData() const noexcept {
-  lock_guard{_logDataMutex};
-  return _logData;
+void Monitor::stop() {
+  _isRunning = false;
+  // Wait for thread to stop
+  while (not _runThread->joinable())
+    ;
+  _runThread->join();
+}
+
+list<LogItem> Monitor::logs() const noexcept {
+  lock_guard{_logsMutex};
+  return _logs;
 }
 
 list<Alert> Monitor::alerts() const noexcept {
@@ -58,27 +72,35 @@ list<Alert> Monitor::alerts() const noexcept {
   return _alerts;
 }
 
-void Monitor::update(const string& line) noexcept {
-  lock_guard{_logDataMutex};
-
-  // Removes logs older than a certain amount of seconds
+// Removes logs older than a certain threshold
+void Monitor::eraseOldLogs(const chrono::seconds& threshold) noexcept {
   auto now = chrono::system_clock::now();
-  auto timeComparator = [this, now](auto item) -> bool {
+  auto timeComparator = [threshold, now](auto item) -> bool {
     auto elapsed = now - item.dateTime;
-    return elapsed > _alertDuration;
+    return elapsed > threshold;
   };
-  auto it = remove_if(_logData.begin(), _logData.end(), timeComparator);
-  _logData.erase(it, _logData.end());
+
+  lock_guard{_logsMutex};
+  _logs.remove_if(timeComparator);
+}
+
+void Monitor::updateLogs(const string& line) noexcept {
+  lock_guard{_logsMutex};
 
   // Creates new log
-  _logData.emplace_back(LogItem::from(line));
+  _logs.emplace_back(LogItem::from(line));
+}
 
-  auto hits = _logData.size();
+void Monitor::updateAlert() noexcept {
+  lock_guard{_alertsMutex};
+
+  auto hits = _logs.size();
 
   auto averageHits =
       _alertThreshold * static_cast<unsigned long>(_alertDuration.count());
 
   lock_guard{_alertsMutex};
+  // MAGIC NUMBERS
   while (_alerts.size() > 5) {
     _alerts.pop_front();
   }
@@ -101,18 +123,18 @@ void Monitor::update(const string& line) noexcept {
   }
 }
 
-[[noreturn]] void Monitor::run() noexcept {
+void Monitor::run() noexcept {
   string line;
-  // TODO: We might want to find a way to stop this somehow
-  while (true) {
-    while (getline(_file, line)) {
-      if (line.empty()) {
-        continue;
-      }
-      update(line);
+  while (_isRunning) {
+    eraseOldLogs(_alertDuration);
+
+    if (getline(_file, line)) {
+      updateLogs(line);
     }
 
-    if (not _file.eof()) {
+    updateAlert();
+
+    if (not _file.eof() && not _file.good()) {
       // TODO: Handle this?
     }
 
