@@ -11,24 +11,43 @@
 
 using namespace chrono;
 
-Display::Display(const fs::path& logFile) : _monitor(new Monitor(logFile)) {}
+Display::Display(const fs::path& logFile, unsigned long hitsThreshold,
+                 const chrono::seconds& alertDuration)
+    : _monitor(new Monitor(logFile, hitsThreshold, alertDuration)) {}
 
 [[noreturn]] void Display::run() {
   _monitor->start();
 
   while (true) {
     Display::clear();
+    auto now = time_point_cast<seconds>(system_clock::now());
 
     auto logs = _monitor->logData();
 
+    // TODO: This is not printings last 10 seconds
+    // logs anymore, fix it
     cout << "Hits in 10 seconds: " << logs.size();
-
     cout << "\n\n";
 
     printHitsTable(logs);
 
+    auto alerts = _monitor->alerts();
+
+    for (const auto& a : alerts) {
+      cout << "High traffic generated an alert - hits = ";
+      cout << a.hits;
+      cout << ", triggered at ";
+      cout << date::format("%F %T", time_point_cast<seconds>(a.triggerTime));
+      cout << '\n';
+
+      if (a.hasRecovered()) {
+        cout << "Previous alert recovered at ";
+        cout << date::format("%F %T", time_point_cast<seconds>(a.recoverTime));
+        cout << '\n';
+      }
+    }
+
     // Shows current date and time.
-    auto now = time_point_cast<seconds>(system_clock::now());
     cout << date::format("%F %T", now) << '\n';
 
     this_thread::sleep_for(1s);

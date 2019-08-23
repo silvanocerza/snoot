@@ -11,8 +11,13 @@ namespace fs = std::filesystem;
 int main(int argc, const char* argv[]) {
   args::ArgumentParser parser("Snoot, HTTP access log monitor");
   args::HelpFlag help(parser, "help", "Display this menu", {'h', "help"});
-  args::ValueFlag<fs::path> fileArg(parser, "file", "The HTTP access log file",
-                                    {'f', "file"});
+  args::ValueFlag<fs::path> fileArg(
+      parser, "file", "The HTTP access log file, default to /tmp/access.log",
+      {'f', "file"});
+  args::ValueFlag<unsigned long> hitsArgs(
+      parser, "hits threshold",
+      "The amount of hits per second necessary to trigger an alert",
+      {'t', "threshold"});
 
   try {
     parser.ParseCLI(argc, argv);
@@ -30,7 +35,14 @@ int main(int argc, const char* argv[]) {
     file = fileArg.Get();
   }
 
-  Display d(file);
+  unsigned long hitsThreshold = 5;
+  if (hitsArgs) {
+    hitsThreshold = hitsArgs.Get();
+  }
+
+  auto alertDuration = 10s;
+
+  Display d(file, hitsThreshold, alertDuration);
   d.run();
   return 0;
 }

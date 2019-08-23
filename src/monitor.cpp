@@ -4,7 +4,11 @@
 
 #include "monitor.h"
 
-Monitor::Monitor(const fs::path& file) {
+Monitor::Monitor(const fs::path& file, unsigned long hitsThreshold,
+                 const chrono::seconds& alertDuration)
+    : _alertThreshold(hitsThreshold),
+      _alertDuration(alertDuration),
+      _latestActiveAlert(_alerts.end()) {
   switch (fs::status(file).type()) {
     case fs::file_type::fifo:
     case fs::file_type::symlink:
@@ -49,20 +53,52 @@ list<LogItem> Monitor::logData() const noexcept {
   return _logData;
 }
 
+list<Alert> Monitor::alerts() const noexcept {
+  lock_guard{_alertsMutex};
+  return _alerts;
+}
+
 void Monitor::update(const string& line) noexcept {
   lock_guard{_logDataMutex};
 
   // Removes logs older than a certain amount of seconds
   auto now = chrono::system_clock::now();
-  auto it =
-      remove_if(_logData.begin(), _logData.end(), [now](auto item) -> bool {
-        auto elapsed = now - item.dateTime;
-        return elapsed > 10s;
-      });
+  auto timeComparator = [this, now](auto item) -> bool {
+    auto elapsed = now - item.dateTime;
+    return elapsed > _alertDuration;
+  };
+  auto it = remove_if(_logData.begin(), _logData.end(), timeComparator);
   _logData.erase(it, _logData.end());
 
   // Creates new log
   _logData.emplace_back(LogItem::from(line));
+
+  auto hits = _logData.size();
+
+  auto averageHits =
+      _alertThreshold * static_cast<unsigned long>(_alertDuration.count());
+
+  lock_guard{_alertsMutex};
+  while (_alerts.size() > 5) {
+    _alerts.pop_front();
+  }
+
+  if (hits > averageHits) {
+    if (_latestActiveAlert == _alerts.end()) {
+      // New alert
+      auto now = chrono::system_clock::now();
+      _alerts.emplace_back(hits, now);
+      auto it = _alerts.end();
+      it--;
+      _latestActiveAlert = it;
+    }
+  } else {
+    if (_latestActiveAlert != _alerts.end()) {
+      // Recover
+      _latestActiveAlert->recoverTime = chrono::system_clock::now();
+      _latestActiveAlert = _alerts.end();
+    }
+  }
 }
 
 [[noreturn]] void Monitor::run() noexcept {

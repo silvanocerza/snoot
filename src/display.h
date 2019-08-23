@@ -10,7 +10,8 @@ namespace fs = std::filesystem;
 
 class Display {
  public:
-  Display(const fs::path& logFile);
+  Display(const fs::path& logFile, unsigned long hitsThreshold,
+          const chrono::seconds& alertDuration);
   virtual ~Display() = default;
 
   Display(Display&&) = delete;
