@@ -1,7 +1,9 @@
+add_library(catch STATIC test_main.cpp)
+target_include_directories(catch PUBLIC ../3rdparty/catch2)
+
 macro(_snoot_test TEST_NAME)
   add_executable(${TEST_NAME} ${ARGN})
-  target_link_libraries(${TEST_NAME} snoot_lib)
-  target_include_directories(${TEST_NAME} PUBLIC ../3rdparty/catch2)
+  target_link_libraries(${TEST_NAME} snoot_lib catch)
   add_test(${TEST_NAME} ${TEST_NAME})
 endmacro()
 

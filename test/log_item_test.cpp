@@ -1,9 +1,9 @@
+#include <catch.hpp>
+
 #include "../src/log_item.h"
 
 #include "utils.h"
 
-#define CATCH_CONFIG_MAIN
-#include <catch.hpp>
 
 using namespace chrono;
 
