@@ -8,7 +8,7 @@ Monitor::Monitor(const fs::path& file, unsigned long hitsThreshold,
                  const chrono::seconds& alertDuration)
     : _alertThreshold(hitsThreshold),
       _alertDuration(alertDuration),
-      _latestActiveAlert(_alerts.end()) {
+      _lastActiveAlert(_alerts.end()) {
   switch (fs::status(file).type()) {
     case fs::file_type::fifo:
     case fs::file_type::symlink:
@@ -42,6 +42,9 @@ Monitor::Monitor(const fs::path& file, unsigned long hitsThreshold,
     throw system_error(errno, system_category(),
                        "Error opening file " + file.string());
   }
+
+  _averageHitsToAlert =
+      _alertThreshold * static_cast<unsigned long>(_alertDuration.count());
 }
 
 Monitor::~Monitor() {
@@ -96,29 +99,26 @@ void Monitor::updateAlert() noexcept {
 
   auto hits = _logs.size();
 
-  auto averageHits =
-      _alertThreshold * static_cast<unsigned long>(_alertDuration.count());
-
   lock_guard{_alertsMutex};
   // MAGIC NUMBERS
   while (_alerts.size() > 5) {
     _alerts.pop_front();
   }
 
-  if (hits > averageHits) {
-    if (_latestActiveAlert == _alerts.end()) {
+  if (hits > _averageHitsToAlert) {
+    if (_lastActiveAlert == _alerts.end()) {
       // New alert
       auto now = chrono::system_clock::now();
       _alerts.emplace_back(hits, now);
       auto it = _alerts.end();
       it--;
-      _latestActiveAlert = it;
+      _lastActiveAlert = it;
     }
   } else {
-    if (_latestActiveAlert != _alerts.end()) {
+    if (_lastActiveAlert != _alerts.end()) {
       // Recover
-      _latestActiveAlert->recoverTime = chrono::system_clock::now();
-      _latestActiveAlert = _alerts.end();
+      _lastActiveAlert->recoverTime = chrono::system_clock::now();
+      _lastActiveAlert = _alerts.end();
     }
   }
 }

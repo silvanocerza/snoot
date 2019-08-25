@@ -44,15 +44,25 @@ class Monitor {
   list<LogItem> logs() const noexcept;
   list<Alert> alerts() const noexcept;
 
+  unsigned long alertThreshold() const noexcept { return _alertThreshold; }
+  chrono::seconds alertDuration() const noexcept { return _alertDuration; }
+  unsigned long averageHitsToAlert() const noexcept {
+    return _averageHitsToAlert;
+  }
+
  private:
   atomic<bool> _isRunning;
 
+  // Number of hits per second to exceed to trigger alert
   unsigned long _alertThreshold;
+  // Alert window to take into consideration to trigger alerts
   chrono::seconds _alertDuration;
+  // Number of hits to exceed in the alert window to trigger alert
+  unsigned long _averageHitsToAlert;
 
   list<Alert> _alerts;
   using alertIt = list<Alert>::iterator;
-  alertIt _latestActiveAlert;
+  alertIt _lastActiveAlert;
   mutable mutex _alertsMutex;
 
   unique_ptr<thread> _runThread;
