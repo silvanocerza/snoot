@@ -64,10 +64,10 @@ void Display::printHitsTable(list<LogItem> logs) const noexcept {
   // First count resources hits
   unordered_map<string, int> resourcesHits;
   for (const auto& item : logs) {
-    if (resourcesHits.count(item.resource) == 0) {
-      resourcesHits.emplace(item.resource, 1);
+    if (resourcesHits.count(item.resource()) == 0) {
+      resourcesHits.emplace(item.resource(), 1);
     } else {
-      resourcesHits[item.resource]++;
+      resourcesHits[item.resource()]++;
     }
   }
 

@@ -79,7 +79,7 @@ list<Alert> Monitor::alerts() const noexcept {
 void Monitor::eraseOldLogs(const chrono::seconds& threshold) noexcept {
   auto now = chrono::system_clock::now();
   auto timeComparator = [threshold, now](auto item) -> bool {
-    auto elapsed = now - item.dateTime;
+    auto elapsed = now - item.dateTime();
     return elapsed > threshold;
   };
 
@@ -91,7 +91,10 @@ void Monitor::updateLogs(const string& line) noexcept {
   lock_guard{_logsMutex};
 
   // Creates new log
-  _logs.emplace_back(LogItem::from(line));
+  auto log = LogItem::from(line);
+  if (log.isValid()) {
+    _logs.emplace_back(log);
+  }
 }
 
 void Monitor::updateAlert() noexcept {
