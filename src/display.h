@@ -12,7 +12,8 @@ namespace fs = std::filesystem;
 class Display {
  public:
   Display(const fs::path& logFile, unsigned long hitsThreshold,
-          const chrono::seconds& alertDuration);
+          const chrono::seconds& alertDuration,
+          const chrono::seconds& refreshRate);
   virtual ~Display() = default;
 
   Display(Display&&) = delete;
@@ -25,6 +26,7 @@ class Display {
  private:
   unique_ptr<Monitor> _monitor;
   chrono::system_clock::time_point _startTime;
+  chrono::seconds _refreshRate;
 
   static void clear() noexcept;
   void printAlerts() const noexcept;

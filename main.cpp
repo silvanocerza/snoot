@@ -12,12 +12,21 @@ int main(int argc, const char* argv[]) {
   args::ArgumentParser parser("Snoot, HTTP access log monitor");
   args::HelpFlag help(parser, "help", "Display this menu", {'h', "help"});
   args::ValueFlag<fs::path> fileArg(
-      parser, "file", "The HTTP access log file, default to /tmp/access.log",
+      parser, "file", "The HTTP access log file, defaults to /tmp/access.log",
       {'f', "file"});
-  args::ValueFlag<unsigned long> hitsArgs(
+  args::ValueFlag<unsigned long> hitsArg(
       parser, "hits threshold",
       "The amount of hits per second necessary to trigger an alert",
       {'t', "threshold"});
+  args::ValueFlag<unsigned long> alertDurationArg(
+      parser, "alert duration",
+      "The number of seconds to look back when searching for the number of "
+      "logs necessary to trigger an alert",
+      {'d', "alert-duration"});
+  args::ValueFlag<unsigned long> refreshRateArg(
+      parser, "refresh rate",
+      "Number of seconds after which the displayed information is refreshed",
+      {'r', "refresh-rate"});
 
   try {
     parser.ParseCLI(argc, argv);
@@ -36,13 +45,21 @@ int main(int argc, const char* argv[]) {
   }
 
   unsigned long hitsThreshold = 5;
-  if (hitsArgs) {
-    hitsThreshold = hitsArgs.Get();
+  if (hitsArg) {
+    hitsThreshold = hitsArg.Get();
   }
 
-  auto alertDuration = 10s;
+  auto alertDuration = 120s;
+  if (alertDurationArg) {
+    alertDuration = chrono::seconds(alertDurationArg.Get());
+  }
 
-  Display d(file, hitsThreshold, alertDuration);
+  auto refreshRate = 10s;
+  if (refreshRateArg) {
+    refreshRate = chrono::seconds(refreshRateArg.Get());
+  }
+
+  Display d(file, hitsThreshold, alertDuration, refreshRate);
   d.run();
   return 0;
 }

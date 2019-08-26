@@ -12,8 +12,9 @@
 using namespace chrono;
 
 Display::Display(const fs::path& logFile, unsigned long hitsThreshold,
-                 const chrono::seconds& alertDuration)
-    : _monitor(new Monitor(logFile, hitsThreshold, alertDuration)) {}
+                 const seconds& alertDuration, const seconds& refreshRate)
+    : _monitor(new Monitor(logFile, hitsThreshold, alertDuration)),
+      _refreshRate(refreshRate) {}
 
 [[noreturn]] void Display::run() {
   _monitor->start();
@@ -31,7 +32,7 @@ Display::Display(const fs::path& logFile, unsigned long hitsThreshold,
     printHitsTable();
     printGeneralInfo();
 
-    this_thread::sleep_for(1s);
+    this_thread::sleep_for(_refreshRate);
   }
 }
 
