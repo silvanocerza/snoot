@@ -111,14 +111,21 @@ void Display::printGeneralInfo() const noexcept {
   cout << "          General info          \n";
   cout << "--------------------------------\n";
   auto elapsed = duration_cast<seconds>(now - _startTime);
-  cout << setw(20) << left << "Refresh rate: " << _refreshRate.count()
-       << " seconds\n";
   cout << setw(20) << left << "Elapsed time: " << date::format("%T", elapsed)
        << '\n';
   cout << setw(20) << left << "Current time: " << date::format("%F %T", now)
-       << '\n';
+       << "\n\n";
+
   cout << setw(20) << left << "Total hits:" << _monitor->totalHits() << '\n';
   // Traffic in KB
   auto traffic = _monitor->totalTraffic() / 1000.f;
-  cout << setw(20) << left << "Total traffic:" << traffic << "KB\n";
+  cout << setw(20) << left << "Total traffic:" << traffic << "KB\n\n";
+
+  cout << setw(20) << left << "Alert threshold: " << _monitor->alertThreshold()
+       << " per second\n";
+  cout << setw(20) << left
+       << "Alert duration: " << _monitor->alertDuration().count()
+       << " seconds\n";
+  cout << setw(20) << left << "Refresh rate: " << _refreshRate.count()
+       << " seconds\n";
 }
