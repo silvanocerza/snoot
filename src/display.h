@@ -25,7 +25,9 @@ class Display {
 
  private:
   unique_ptr<Monitor> _monitor;
+  // That's pretty self explanatory I think
   chrono::system_clock::time_point _startTime;
+  // Number of seconds to wait before refreshing information displayed
   chrono::seconds _refreshRate;
 
   static void clear() noexcept;

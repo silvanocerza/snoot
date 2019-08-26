@@ -23,11 +23,6 @@ Display::Display(const fs::path& logFile, unsigned long hitsThreshold,
   while (true) {
     Display::clear();
 
-    // TODO: This is not printings last 10 seconds
-    // logs anymore, fix it
-    //    cout << "Hits in 10 seconds: " << logs.size();
-    //    cout << "\n\n";
-
     printAlerts();
     printHitsTable();
     printGeneralInfo();
@@ -116,6 +111,8 @@ void Display::printGeneralInfo() const noexcept {
   cout << "          General info          \n";
   cout << "--------------------------------\n";
   auto elapsed = duration_cast<seconds>(now - _startTime);
+  cout << setw(20) << left << "Refresh rate: " << _refreshRate.count()
+       << " seconds\n";
   cout << setw(20) << left << "Elapsed time: " << date::format("%T", elapsed)
        << '\n';
   cout << setw(20) << left << "Current time: " << date::format("%F %T", now)
