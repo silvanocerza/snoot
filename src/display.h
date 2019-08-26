@@ -9,6 +9,8 @@
 using namespace std;
 namespace fs = std::filesystem;
 
+// Display has only one task: display the information from
+// its internal Monitor. Nothing else.
 class Display {
  public:
   Display(const fs::path& logFile, unsigned long hitsThreshold,
@@ -24,8 +26,9 @@ class Display {
   [[noreturn]] void run();
 
  private:
+  // Monitor where data is retrieved from
   unique_ptr<Monitor> _monitor;
-  // That's pretty self explanatory I think
+  // When run() has been called
   chrono::system_clock::time_point _startTime;
   // Number of seconds to wait before refreshing information displayed
   chrono::seconds _refreshRate;
