@@ -7,7 +7,9 @@
 
 Monitor::Monitor(const fs::path& file, unsigned long hitsThreshold,
                  const chrono::seconds& alertDuration)
-    : _alertThreshold(hitsThreshold),
+    : _totalHits(0),
+      _totalTraffic(0),
+      _alertThreshold(hitsThreshold),
       _alertDuration(alertDuration),
       _lastActiveAlert(_alerts.end()) {
   switch (fs::status(file).type()) {
@@ -96,6 +98,8 @@ void Monitor::updateLogs(const string& line) noexcept {
   auto log = LogItem::from(line);
   if (log.isValid()) {
     _logs.emplace_back(log);
+    _totalHits++;
+    _totalTraffic += static_cast<unsigned long>(log.size());
   }
 }
 

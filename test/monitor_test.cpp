@@ -98,4 +98,82 @@ TEST_CASE("Monitor") {
     f.close();
     fs::remove(logFile);
   }
+
+  SECTION("Verifies average hits to trigger alert is calculated correctly") {
+    Monitor monitor1(logFile, 10, 120s);
+    monitor1.start();
+    REQUIRE(monitor1.averageHitsToAlert() == 1200);
+
+    Monitor monitor2(logFile, 2, 2s);
+    monitor2.start();
+    REQUIRE(monitor2.averageHitsToAlert() == 4);
+
+    Monitor monitor3(logFile, 4, 10s);
+    monitor3.start();
+    REQUIRE(monitor3.averageHitsToAlert() == 40);
+  }
+
+  SECTION("Verifes total number of hits and total traffic is correct") {
+    ofstream f(logFile, ios::ate | ios::out);
+
+    Monitor monitor(logFile, 10, 2s);
+    monitor.start();
+
+    auto now = time_point_cast<seconds>(system_clock::now());
+    auto dateTime = date::format(locale(""), "%d/%b/%EY:%T %z", now);
+
+    // Writes some lines to logFile
+    f << "127.0.0.1 - alien ";
+    f << "[" << dateTime << "] ";
+    f << "\"HEAD /docs/api/tutorial HTTP/1.0\" ";
+    f << "202 40" << endl;
+
+    f << "127.0.0.1 - alien ";
+    f << "[" << dateTime << "] ";
+    f << "\"CONNECT /docs/api/reference HTTP/1.0\" ";
+    f << "500 113" << endl;
+
+    // Write some empty lines too
+    f << endl;
+    f << endl;
+
+    f << "127.0.0.1 - alien ";
+    f << "[" << dateTime << "] ";
+    f << "\"PUT /api HTTP/1.0\" ";
+    f << "400 123" << endl;
+
+    // Waits for processing
+    this_thread::sleep_for(0.5s);
+
+    REQUIRE(monitor.logs().size() == 3);
+    REQUIRE(monitor.totalHits() == 3);
+    REQUIRE(monitor.totalTraffic() == 276);
+
+    // Waits a bit to go over alert threshold so old logs are deleted
+    this_thread::sleep_for(2s);
+
+    now = time_point_cast<seconds>(system_clock::now());
+    dateTime = date::format(locale(""), "%d/%b/%EY:%T %z", now);
+
+    // Writes some more logs
+    f << "127.0.0.1 - alien ";
+    f << "[" << dateTime << "] ";
+    f << "\"HEAD /docs/api/tutorial HTTP/1.0\" ";
+    f << "202 69" << endl;
+
+    f << "127.0.0.1 - alien ";
+    f << "[" << dateTime << "] ";
+    f << "\"CONNECT /docs/api/reference HTTP/1.0\" ";
+    f << "500 420" << endl;
+
+    // Waits for processing
+    this_thread::sleep_for(0.5s);
+
+    REQUIRE(monitor.logs().size() == 2);
+    REQUIRE(monitor.totalHits() == 5);
+    REQUIRE(monitor.totalTraffic() == 765);
+
+    f.close();
+    fs::remove(logFile);
+  }
 }

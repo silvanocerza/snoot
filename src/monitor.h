@@ -43,6 +43,9 @@ class Monitor {
   void start();
   void stop();
 
+  unsigned long totalHits() const noexcept { return _totalHits; }
+  unsigned long totalTraffic() const noexcept { return _totalTraffic; }
+
   list<LogItem> logs() const noexcept;
   list<Alert> alerts() const noexcept;
 
@@ -54,6 +57,11 @@ class Monitor {
 
  private:
   atomic<bool> _isRunning;
+
+  // Total number of requests since Monitor started
+  unsigned long _totalHits;
+  // Total traffic in bytes since Monitor started
+  unsigned long _totalTraffic;
 
   // Number of hits per second to exceed to trigger alert
   unsigned long _alertThreshold;
