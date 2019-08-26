@@ -14,13 +14,22 @@ option(BUILD_TESTING "Builds tests" OFF)
 set(CMAKE_CXX_STANDARD 17)
 
 file(GLOB SNOOT_SOURCES "src/*.cpp")
-add_compile_options(-Wall -Wextra -Werror -Wnon-virtual-dtor -Woverloaded-virtual -Wold-style-cast -std=c++17)
+
+if (MSVC)
+	set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+endif(MSVC)
+
+if (UNIX)
+	add_compile_options(-Wall -Wextra -Werror -Wnon-virtual-dtor -Woverloaded-virtual -Wold-style-cast -std=c++17)
+endif(UNIX)
 
 # Outputs
 # Library
 add_library(snoot_lib SHARED ${SNOOT_SOURCES})
 # This probably will need to be changed for Windows
-target_link_libraries(snoot_lib pthread)
+if (UNIX)
+	target_link_libraries(snoot_lib pthread)
+endif(UNIX)
 target_include_directories(snoot_lib PUBLIC 3rdparty/date/include/date/)
 install(TARGETS snoot_lib
       LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}

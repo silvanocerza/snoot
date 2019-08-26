@@ -49,7 +49,7 @@ Monitor::Monitor(const fs::path& file, unsigned long hitsThreshold,
   // Seek last line on open, we don't really care about previous logs
   _file.open(file, ios::ate | ios::in);
 
-  if (not _file.is_open()) {
+  if (!_file.is_open()) {
     throw system_error(errno, system_category(),
                        "Error opening file " + file.string());
   }
@@ -71,7 +71,7 @@ void Monitor::start() {
 void Monitor::stop() {
   _isRunning = false;
   // Wait for thread to stop
-  while (not _runThread->joinable())
+  while (!_runThread->joinable())
     ;
   _runThread->join();
 }
@@ -149,7 +149,7 @@ void Monitor::run() {
 
     updateAlert();
 
-    if (not _file.eof() && not _file.good()) {
+    if (!_file.eof() && !_file.good()) {
       string errorString(strerror(errno));
       throw runtime_error("Error while monitoring log file: " + errorString);
     }
