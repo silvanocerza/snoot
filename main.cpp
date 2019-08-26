@@ -16,16 +16,18 @@ int main(int argc, const char* argv[]) {
       {'f', "file"});
   args::ValueFlag<unsigned long> hitsArg(
       parser, "hits threshold",
-      "The amount of hits per second necessary to trigger an alert",
+      "The amount of hits per second necessary to trigger an alert, defaults "
+      "to 10",
       {'t', "threshold"});
   args::ValueFlag<unsigned long> alertDurationArg(
       parser, "alert duration",
       "The number of seconds to look back when searching for the number of "
-      "logs necessary to trigger an alert",
+      "logs necessary to trigger an alert, defaults to 120",
       {'d', "alert-duration"});
   args::ValueFlag<unsigned long> refreshRateArg(
       parser, "refresh rate",
-      "Number of seconds after which the displayed information is refreshed",
+      "Number of seconds after which the displayed information is refreshed, "
+      "defaults to 10",
       {'r', "refresh-rate"});
 
   try {
@@ -44,7 +46,7 @@ int main(int argc, const char* argv[]) {
     file = fileArg.Get();
   }
 
-  unsigned long hitsThreshold = 5;
+  unsigned long hitsThreshold = 10;
   if (hitsArg) {
     hitsThreshold = hitsArg.Get();
   }
