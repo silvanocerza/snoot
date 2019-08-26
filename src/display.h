@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <filesystem>
 #include <memory>
 
@@ -23,9 +24,12 @@ class Display {
 
  private:
   unique_ptr<Monitor> _monitor;
+  chrono::system_clock::time_point _startTime;
 
   static void clear() noexcept;
-  void printHitsTable(list<LogItem> logs) const noexcept;
+  void printAlerts() const noexcept;
+  void printHitsTable() const noexcept;
+  void printGeneralInfo() const noexcept;
 
   static constexpr unsigned int HITS_TABLE_ROWS = 12;
 };

@@ -12,6 +12,13 @@ Monitor::Monitor(const fs::path& file, unsigned long hitsThreshold,
       _alertThreshold(hitsThreshold),
       _alertDuration(alertDuration),
       _lastActiveAlert(_alerts.end()) {
+  if (_alertThreshold == 0) {
+    // TODO: What here?
+  }
+  if (_alertDuration == 0s) {
+    // TODO: What here?
+  }
+
   switch (fs::status(file).type()) {
     case fs::file_type::fifo:
     case fs::file_type::symlink:
