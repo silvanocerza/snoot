@@ -176,4 +176,16 @@ TEST_CASE("Monitor") {
     f.close();
     fs::remove(logFile);
   }
+
+  SECTION("Verifies constructor error handling") {
+    REQUIRE_THROWS_WITH(
+        Monitor(logFile, 0, 10s),
+        "Hits per second to trigger an alert must not be zero.");
+
+    REQUIRE_THROWS_WITH(Monitor(logFile, 10, 0s),
+                        "An alert duration can't be zero.");
+
+    fs::path unexistingFile("someUnexistingFile");
+    REQUIRE_THROWS_WITH(Monitor(unexistingFile, 10, 10s), "File not found.");
+  }
 }

@@ -13,15 +13,14 @@ Monitor::Monitor(const fs::path& file, unsigned long hitsThreshold,
       _alertDuration(alertDuration),
       _lastActiveAlert(_alerts.end()) {
   if (_alertThreshold == 0) {
-    // TODO: What here?
+    throw runtime_error(
+        "Hits per second to trigger an alert must not be zero.");
   }
   if (_alertDuration == 0s) {
-    // TODO: What here?
+    throw runtime_error("An alert duration can't be zero.");
   }
 
   switch (fs::status(file).type()) {
-    case fs::file_type::fifo:
-    case fs::file_type::symlink:
     case fs::file_type::regular: {
       // We got a usable file, just keep going
       break;
@@ -33,6 +32,8 @@ Monitor::Monitor(const fs::path& file, unsigned long hitsThreshold,
     case fs::file_type::not_found: {
       throw runtime_error("File not found.");
     };
+    case fs::file_type::fifo:
+    case fs::file_type::symlink:
     case fs::file_type::block:
     case fs::file_type::directory:
     case fs::file_type::socket:
