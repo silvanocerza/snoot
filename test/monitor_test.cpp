@@ -185,7 +185,8 @@ TEST_CASE("Monitor") {
     REQUIRE_THROWS_WITH(Monitor(logFile, 10, 0s),
                         "An alert duration can't be zero.");
 
-    fs::path unexistingFile("someUnexistingFile");
-    REQUIRE_THROWS_WITH(Monitor(unexistingFile, 10, 10s), "File not found.");
+    fs::path unexistingFile("unexistingFile");
+    REQUIRE_THROWS_WITH(Monitor(unexistingFile, 10, 10s),
+                        "File 'unexistingFile' not found.");
   }
 }

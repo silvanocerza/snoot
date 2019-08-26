@@ -30,7 +30,7 @@ Monitor::Monitor(const fs::path& file, unsigned long hitsThreshold,
       throw runtime_error("Something really bad has happened!");
     };
     case fs::file_type::not_found: {
-      throw runtime_error("File not found.");
+      throw runtime_error("File \'" + file.string() + "\' not found.");
     };
     case fs::file_type::fifo:
     case fs::file_type::symlink:
