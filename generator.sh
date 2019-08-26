@@ -4,7 +4,21 @@
 # Just pipe its output to a file
 
 
-METHODS=("GET" "HEAD" "POST" "PUT" "DELETE" "CONNECT" "OPTIONS" "TRACE")
+METHODS=(
+    "GET"
+    "HEAD"
+    "POST"
+    "PUT"
+    "DELETE"
+    "TRACE"
+    "OPTIONS"
+    "CONNECT"
+    "PATCH"
+    "BOGUS"
+    "WHAT"
+    ""
+    "AHA"
+)
 RESOURCES=(
     "/report"
     "/api"
@@ -13,8 +27,22 @@ RESOURCES=(
     "/docs/api"
     "/docs/api/tutorial"
     "/docs/api/reference"
+    "docs"
+    "docs/api"
+    "docs/api/reference"
+    "2134"
+    "docs /api"
 )
-STATUSES=("200" "202" "400" "404" "500")
+STATUSES=(
+    "200"
+    "202"
+    "400"
+    "404"
+    "500"
+    "NaN"
+    "No"
+    "Something"
+)
 
 # Returns a random element from the passed argument
 # Usage: random_element ARRAY_NAME
@@ -39,7 +67,6 @@ do
     echo "$host $rfc931 $user [$now] \"$method $resource $protocol\" $status $size"
 
     # Sleep for a bit
-    sleep $(echo "$(( $RANDOM % 2 )).$(( $RANDOM % 999 ))")
-
+    sleep $(echo "0.$(( $RANDOM % 50 ))")
 done
 
