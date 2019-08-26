@@ -33,8 +33,10 @@ Then in another terminal start Snoop:
 
 Building this project require these tools:
 
-* C++17 compliant compiler (GCC 7, Clang 6, MSVC 19.14)
+* C++17 compliant compiler (GCC 7, Clang 7, MSVC 19.14)
 * CMake >= 3.1
+
+The compiler shipped with Xcode supports C++17 language features but not C++17 standard library features. So it can't be used for this project.
 
 And these libraries:
 
@@ -71,6 +73,10 @@ cmake -DBUILD_TESTING=ON ..
 make
 ctest --output-on-failure
 ```
+
+On OS X before calling `cmake ..` run `export CC=$(which clang) && export CXX=$(which clang++)`, or it will use XCode compiler.
+
+On Windows you should use Visual Studio after generating its project files with CMake.
 
 ## Possible improvements
 
