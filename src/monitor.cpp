@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cstring>
 #include <exception>
 #include <iostream>
 
@@ -87,6 +88,7 @@ void Monitor::eraseOldLogs(const chrono::seconds& threshold) noexcept {
   _logs.remove_if(timeComparator);
 }
 
+// Parses passed line and creates new LogItem if line is parsed correctly
 void Monitor::updateLogs(const string& line) noexcept {
   lock_guard{_logsMutex};
 
@@ -97,17 +99,13 @@ void Monitor::updateLogs(const string& line) noexcept {
   }
 }
 
+// Triggers or recovers Alerts if necessary
 void Monitor::updateAlert() noexcept {
   lock_guard{_alertsMutex};
 
   auto hits = _logs.size();
 
   lock_guard{_alertsMutex};
-  // MAGIC NUMBERS
-  while (_alerts.size() > 5) {
-    _alerts.pop_front();
-  }
-
   if (hits > _averageHitsToAlert) {
     if (_lastActiveAlert == _alerts.end()) {
       // New alert
@@ -126,7 +124,9 @@ void Monitor::updateAlert() noexcept {
   }
 }
 
-void Monitor::run() noexcept {
+// Runs concurrently in a separate thread to monitor continuosly the specified
+// log file.
+void Monitor::run() {
   string line;
   while (_isRunning) {
     eraseOldLogs(_alertDuration);
@@ -138,7 +138,8 @@ void Monitor::run() noexcept {
     updateAlert();
 
     if (not _file.eof() && not _file.good()) {
-      // TODO: Handle this?
+      string errorString(strerror(errno));
+      throw runtime_error("Error while monitoring log file: " + errorString);
     }
 
     // Clear eof state so that we can keep reading
