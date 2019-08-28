@@ -36,7 +36,6 @@ Building this project require these tools:
 * C++17 compliant compiler (GCC 7, Clang 7, MSVC 19.14)
 * CMake >= 3.1
 
-The compiler shipped with Xcode supports C++17 language features but not C++17 standard library features. So it can't be used for this project.
 
 And these libraries:
 
@@ -45,6 +44,20 @@ And these libraries:
 * [`catch2`](https://github.com/catchorg/Catch2) (only for testing)
 
 ### Build steps
+
+* Install dependencies
+
+On OS X it should be enough:
+
+```
+brew install llvm cmake
+```
+The compiler shipped with Xcode supports C++17 language features but not C++17 standard library features.
+So it can't be used for this project.
+
+
+On Windows you'll need at least Visual Studio 2017, you can download the latest version [here](https://visualstudio.microsoft.com/downloads/).
+
 
 * Fetch libraries
 
@@ -73,8 +86,6 @@ cmake -DBUILD_TESTING=ON ..
 make
 ctest --output-on-failure
 ```
-
-On OS X before calling `cmake ..` run `export CC=$(which clang) && export CXX=$(which clang++)`, or it will use XCode compiler.
 
 On Windows you should use Visual Studio after generating its project files with CMake.
 
