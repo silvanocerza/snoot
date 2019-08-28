@@ -43,20 +43,12 @@ And these libraries:
 * [`args`](https://github.com/Taywee/args)
 * [`catch2`](https://github.com/catchorg/Catch2) (only for testing)
 
+
 ### Build steps
 
-* Install dependencies
-
-On OS X it should be enough:
-
-```
-brew install llvm cmake
-```
-The compiler shipped with Xcode supports C++17 language features but not C++17 standard library features.
-So it can't be used for this project.
-
-
-On Windows you'll need at least Visual Studio 2017, you can download the latest version [here](https://visualstudio.microsoft.com/downloads/).
+Mac OS X is not supported since the toolchain shipped with XCode supports C++17 language features but
+not C++17 standard library features, so it doesn't find the `<filesystem>` library.
+To circument the issue I suggest running a VM with Linux.
 
 
 * Fetch libraries
