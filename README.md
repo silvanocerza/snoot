@@ -20,13 +20,43 @@ A simple generator is included for testing, to run it:
 ./generator.sh >> fakeLogFile
 ```
 
-Then in another terminal start Snoop:
-
-```
-./path/to/snoop --file=<path/to/fakeLogFile> --refresh-rate=1
-```
+Note that the generator might not output enough valid logs to let `Snoot` trigger alerts, in that case either lower the alert threshold with `--threshold` or the alert duration with `--alert-duration`.
+You could also lower, or remove, the `sleep` amount inside `generator.sh`.
 
 **NOTE: Snoot parses dates using the system locale.**
+
+
+## Sample output
+
+```
+================================
+Most visited during last period
+--------------------------------
+Resources                | Hits
+--------------------------------
+/docs                    |  576
+/api                     |  304
+/report                  |  163
+
+
+--------------------------------
+Total                    | 1043
+--------------------------------
+High traffic generated an alert - hits = 1201, triggered at 2019-08-28 21:21:55
+Previous alert recovered at 2019-08-28 21:23:36
+High traffic generated an alert - hits = 1201, triggered at 2019-08-28 21:23:43
+Previous alert recovered at 2019-08-28 21:23:45
+================================
+          General info
+--------------------------------
+Elapsed time:            00:02:30
+Total hits:              1783
+Total traffic:           177.176KB
+
+Alert threshold:         10 per second
+Alert duration:          120 seconds
+
+```
 
 ## Build and Test
 
@@ -49,8 +79,33 @@ And these libraries:
 
 Mac OS X is not supported since the toolchain shipped with XCode supports C++17 language features but
 not C++17 standard library features, so it doesn't find the `<filesystem>` library.
-To circument the issue I suggest running a VM with Linux.
 
+To circumvent the issue use the included Dockerfile.
+
+### Using Dockerfile
+
+To ease compilation on multiple platforms I've included a Dockerfile to build and run Snoot.
+
+
+* Build the image
+
+```
+docker build -t snoot .
+```
+
+* Run generator in background
+
+```
+./generator >> logFile &
+```
+
+* Run Snoot
+
+```
+docker run --rm -i -v $(pwd):/snoot/logs -a stdout -a stderr snoot -f./logs/logFile -r1 -t3 -d5
+```
+
+### Without Dockerfile
 
 * Fetch libraries
 
@@ -66,15 +121,10 @@ cd build
 cmake -DBUILD_TESTING=ON ..
 ```
 
-* Build
+* Build and run tests
 
 ```
 make
-```
-
-* Run tests
-
-```
 ctest --output-on-failure
 ```
 
