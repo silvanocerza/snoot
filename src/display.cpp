@@ -12,8 +12,10 @@
 using namespace chrono;
 
 Display::Display(const fs::path& logFile, unsigned long hitsThreshold,
-                 const seconds& alertDuration, const seconds& refreshRate)
-    : _monitor(new Monitor(logFile, hitsThreshold, alertDuration)),
+                 const seconds& alertDuration, unsigned int alertHistory,
+                 const seconds& refreshRate)
+    : _monitor(
+          new Monitor(logFile, hitsThreshold, alertDuration, alertHistory)),
       _refreshRate(refreshRate) {}
 
 [[noreturn]] void Display::run() {
@@ -23,8 +25,8 @@ Display::Display(const fs::path& logFile, unsigned long hitsThreshold,
   while (true) {
     Display::clear();
 
-    printAlerts();
     printHitsTable();
+    printAlerts();
     printGeneralInfo();
 
     this_thread::sleep_for(_refreshRate);
@@ -49,11 +51,9 @@ void Display::printAlerts() const noexcept {
     if (a.hasRecovered()) {
       cout << "Previous alert recovered at ";
       cout << date::format("%F %T", time_point_cast<seconds>(a.recoverTime));
-      cout << "\n\n";
+      cout << "\n";
     }
   }
-
-  cout << "\n\n";
 }
 
 // Prints each resources and the number of hits it received
@@ -102,6 +102,7 @@ void Display::printHitsTable() const noexcept {
   cout << setw(25) << left << "Total";
   cout << '|';
   cout << setw(5) << right << totalHits << "\n";
+  cout << "--------------------------------\n";
 }
 
 // Prints elapsed time, current time, total hits and total traffic from start
@@ -123,10 +124,5 @@ void Display::printGeneralInfo() const noexcept {
        << " per second\n";
   cout << setw(25) << left
        << "Alert duration: " << _monitor->alertDuration().count()
-       << " seconds\n";
-  cout << setw(25) << left
-       << "Average hits to alert: " << _monitor->averageHitsToAlert() << " in "
-       << _monitor->alertDuration().count() << " seconds\n";
-  cout << setw(25) << left << "Refresh rate: " << _refreshRate.count()
        << " seconds\n";
 }

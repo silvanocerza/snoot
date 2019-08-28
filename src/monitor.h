@@ -32,7 +32,7 @@ struct Alert {
 class Monitor {
  public:
   Monitor(const fs::path& file, unsigned long hitsThreshold,
-          const chrono::seconds& alertDuration);
+          const chrono::seconds& alertDuration, unsigned int alertHistory);
   virtual ~Monitor();
 
   Monitor(Monitor&&) = delete;
@@ -67,6 +67,8 @@ class Monitor {
   unsigned long _alertThreshold;
   // Alert window to take into consideration to trigger alerts
   chrono::seconds _alertDuration;
+  // Number of alerts to keep in memory after being triggered
+  unsigned int _alertHistory;
   // Number of hits to exceed in the alert window to trigger alert
   unsigned long _averageHitsToAlert;
 

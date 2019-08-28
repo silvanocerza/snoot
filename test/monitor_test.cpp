@@ -19,7 +19,7 @@ TEST_CASE("Monitor") {
   SECTION("Verifies Monitor logs correct number of log lines") {
     ofstream f(logFile, ios::ate | ios::out);
 
-    Monitor monitor(logFile, 10, 15s);
+    Monitor monitor(logFile, 10, 15s, 5);
     monitor.start();
 
     auto now = time_point_cast<seconds>(system_clock::now());
@@ -59,7 +59,7 @@ TEST_CASE("Monitor") {
 
     // If there are more than 2 request per second in the last 2 seconds
     // trigger an alert
-    Monitor monitor(logFile, 2, 2s);
+    Monitor monitor(logFile, 2, 2s, 5);
     monitor.start();
 
     // Verifies we have no alerts by default
@@ -100,15 +100,15 @@ TEST_CASE("Monitor") {
   }
 
   SECTION("Verifies average hits to trigger alert is calculated correctly") {
-    Monitor monitor1(logFile, 10, 120s);
+    Monitor monitor1(logFile, 10, 120s, 5);
     monitor1.start();
     REQUIRE(monitor1.averageHitsToAlert() == 1200);
 
-    Monitor monitor2(logFile, 2, 2s);
+    Monitor monitor2(logFile, 2, 2s, 5);
     monitor2.start();
     REQUIRE(monitor2.averageHitsToAlert() == 4);
 
-    Monitor monitor3(logFile, 4, 10s);
+    Monitor monitor3(logFile, 4, 10s, 5);
     monitor3.start();
     REQUIRE(monitor3.averageHitsToAlert() == 40);
   }
@@ -116,7 +116,7 @@ TEST_CASE("Monitor") {
   SECTION("Verifes total number of hits and total traffic is correct") {
     ofstream f(logFile, ios::ate | ios::out);
 
-    Monitor monitor(logFile, 10, 2s);
+    Monitor monitor(logFile, 10, 2s, 5);
     monitor.start();
 
     auto now = time_point_cast<seconds>(system_clock::now());
@@ -179,14 +179,93 @@ TEST_CASE("Monitor") {
 
   SECTION("Verifies constructor error handling") {
     REQUIRE_THROWS_WITH(
-        Monitor(logFile, 0, 10s),
+        Monitor(logFile, 0, 10s, 5),
         "Hits per second to trigger an alert must not be zero.");
 
-    REQUIRE_THROWS_WITH(Monitor(logFile, 10, 0s),
+    REQUIRE_THROWS_WITH(Monitor(logFile, 10, 0s, 5),
                         "An alert duration can't be zero.");
 
     fs::path unexistingFile("unexistingFile");
-    REQUIRE_THROWS_WITH(Monitor(unexistingFile, 10, 10s),
+    REQUIRE_THROWS_WITH(Monitor(unexistingFile, 10, 10s, 5),
                         "File 'unexistingFile' not found.");
+  }
+
+  SECTION("Verifies alerts are deleted when alert history is reached") {
+    ofstream f(logFile, ios::ate | ios::out);
+
+    // If there are more than 2 request per second in the last 2 seconds
+    // trigger an alert
+    Monitor monitor(logFile, 2, 2s, 2);
+    monitor.start();
+
+    // Verifies we have no alerts by default
+    REQUIRE(monitor.alerts().size() == 0);
+
+    // Trigger an alert
+    auto now = time_point_cast<seconds>(system_clock::now());
+    auto dateTime = date::format(locale(""), "%d/%b/%EY:%T %z", now);
+
+    auto logLine = "127.0.0.1 - alien [" + dateTime +
+                   "] \"HEAD /docs/api/tutorial HTTP/1.0\" "
+                   "202 40";
+    f << logLine << endl;
+    f << logLine << endl;
+    f << logLine << endl;
+    f << logLine << endl;
+    f << logLine << endl;
+
+    // Waits for processing
+    this_thread::sleep_for(0.5s);
+
+    // Verifies new alert is triggered
+    REQUIRE(monitor.alerts().size() == 1);
+
+    // Waits for alert to recover
+    this_thread::sleep_for(3s);
+
+    // Trigger second alert
+    now = time_point_cast<seconds>(system_clock::now());
+    dateTime = date::format(locale(""), "%d/%b/%EY:%T %z", now);
+
+    logLine = "127.0.0.1 - alien [" + dateTime +
+              "] \"HEAD /docs/api/tutorial HTTP/1.0\" "
+              "202 40";
+    f << logLine << endl;
+    f << logLine << endl;
+    f << logLine << endl;
+    f << logLine << endl;
+    f << logLine << endl;
+
+    // Waits for processing
+    this_thread::sleep_for(0.5s);
+
+    // Verifies new alert is triggered
+    REQUIRE(monitor.alerts().size() == 2);
+
+    // Waits for alert to recover
+    this_thread::sleep_for(3s);
+
+    // Trigger third alert
+    now = time_point_cast<seconds>(system_clock::now());
+    dateTime = date::format(locale(""), "%d/%b/%EY:%T %z", now);
+
+    logLine = "127.0.0.1 - alien [" + dateTime +
+              "] \"HEAD /docs/api/tutorial HTTP/1.0\" "
+              "202 40";
+    f << logLine << endl;
+    f << logLine << endl;
+    f << logLine << endl;
+    f << logLine << endl;
+    f << logLine << endl;
+
+    // Waits for processing
+    this_thread::sleep_for(0.5s);
+
+    // Verifies new alert is triggered but number of alerts
+    // doesn't go over alert history
+    REQUIRE(monitor.alerts().size() == 2);
+
+    f.close();
+    fs::remove(logFile);
   }
 }

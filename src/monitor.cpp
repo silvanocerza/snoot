@@ -6,11 +6,13 @@
 #include "monitor.h"
 
 Monitor::Monitor(const fs::path& file, unsigned long hitsThreshold,
-                 const chrono::seconds& alertDuration)
+                 const chrono::seconds& alertDuration,
+                 unsigned int alertHistory)
     : _totalHits(0),
       _totalTraffic(0),
       _alertThreshold(hitsThreshold),
       _alertDuration(alertDuration),
+      _alertHistory(alertHistory),
       _lastActiveAlert(_alerts.end()) {
   if (_alertThreshold == 0) {
     throw runtime_error(
@@ -113,11 +115,17 @@ void Monitor::updateLogs(const string& line) noexcept {
 
 // Triggers or recovers Alerts if necessary
 void Monitor::updateAlert() noexcept {
-  lock_guard{_alertsMutex};
+  lock_guard{_logsMutex};
 
   auto hits = _logs.size();
 
   lock_guard{_alertsMutex};
+
+  // Deletes oldest alert when maximum alert history is reached
+  while (_alerts.size() > _alertHistory) {
+    _alerts.pop_front();
+  }
+
   if (hits > _averageHitsToAlert) {
     if (_lastActiveAlert == _alerts.end()) {
       // New alert

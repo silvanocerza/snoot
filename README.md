@@ -5,13 +5,14 @@ An HTTP access log monitor in C++.
 
 ## Usage
 
-`./snoot [-f FILE_PATH] [-r REFRESH_RATE] [-d ALERT_DURATION] [-t ALERT_THRESHOLD]`
+`./snoot [-f FILE_PATH] [-t ALERT_THRESHOLD] [-d ALERT_DURATION] [-r REFRESH_RATE] [-s ALERT_HISTORY]`
 
 * `-h`, `--help` shows the help menu
 * `-f`, `--file` path to access log file, defaults to `/tmp/access.log`
 * `-t`, `--threshold` amount of hits per second to trigger an alert, default to 10
 * `-d`, `--alert-duration` number of seconds to look back when searching for the number of logs necessary to trigger an alert, defaults to 120
 * `-r`, `--refresh-rate` number of seconds after which the displayed information is refreshed, defaults to 10
+* `-s`, `--alert-history` number of alerts to show in list of triggered alerts
 
 A simple generator is included for testing, to run it:
 

@@ -29,6 +29,10 @@ int main(int argc, const char* argv[]) {
       "Number of seconds after which the displayed information is refreshed, "
       "defaults to 10",
       {'r', "refresh-rate"});
+  args::ValueFlag<unsigned int> alertHistoryArg(
+      parser, "alert history",
+      "Number of alerts to show in list of triggered alerts",
+      {'s', "alert-history"});
 
   try {
     parser.ParseCLI(argc, argv);
@@ -61,7 +65,12 @@ int main(int argc, const char* argv[]) {
     refreshRate = chrono::seconds(refreshRateArg.Get());
   }
 
-  Display d(file, hitsThreshold, alertDuration, refreshRate);
+  unsigned int alertHistory = 5;
+  if (alertHistoryArg) {
+    alertHistory = alertHistoryArg.Get();
+  }
+
+  Display d(file, hitsThreshold, alertDuration, alertHistory, refreshRate);
   d.run();
   return 0;
 }
