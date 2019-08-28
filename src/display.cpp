@@ -80,7 +80,7 @@ void Display::printHitsTable() const noexcept {
 
   // Table header
   cout << "================================\n";
-  cout << "          Most visited          \n";
+  cout << "Most visited during last period \n";
   cout << "--------------------------------\n";
   cout << "Resources                | Hits \n";
   cout << "--------------------------------\n";
