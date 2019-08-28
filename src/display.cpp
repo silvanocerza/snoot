@@ -36,7 +36,7 @@ Display::Display(const fs::path& logFile, unsigned long hitsThreshold,
 void Display::clear() noexcept {
   // It's obviously not the most elegant solution to clear the terminal but it
   // does the job.
-  cout << string(500, '\n') << endl;
+  cout << string(10, '\n') << endl;
 }
 
 // Prints all alerts
