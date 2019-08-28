@@ -16,24 +16,34 @@ set(CMAKE_CXX_STANDARD 17)
 file(GLOB SNOOT_SOURCES "src/*.cpp")
 
 if (MSVC)
-	set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif(MSVC)
 
 if (UNIX)
-	add_compile_options(-Wall -Wextra -Werror -Wnon-virtual-dtor -Woverloaded-virtual -Wold-style-cast -std=c++17)
+  add_compile_options(-Wall -Wextra -Werror -Wnon-virtual-dtor -Woverloaded-virtual -Wold-style-cast -std=c++17)
 endif(UNIX)
 
 # Outputs
 # Library
 add_library(snoot_lib SHARED ${SNOOT_SOURCES})
-# This probably will need to be changed for Windows
+
 if (UNIX)
-	target_link_libraries(snoot_lib pthread)
+  target_link_libraries(snoot_lib pthread)
 endif(UNIX)
+
+if (APPLE)
+  # These paths might need to be corrected
+  include_directories(/usr/local/opt/llvm/include)
+  link_directories(/usr/local/opt/llvm/lib)
+  target_link_libraries(snoot_lib -lc++fs)
+endif(APPLE)
+
 target_include_directories(snoot_lib PUBLIC 3rdparty/date/include/date/)
+
+
 install(TARGETS snoot_lib
-      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 # Executable
 add_executable(${PROJECT_NAME} "main.cpp")
