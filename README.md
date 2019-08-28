@@ -22,7 +22,7 @@ A simple generator is included for testing, to run it:
 Then in another terminal start Snoop:
 
 ```
-./snoop --file=<path_to_fakeLogFile> --refresh-rate=1
+./path/to/snoop --file=<path/to/fakeLogFile> --refresh-rate=1
 ```
 
 **NOTE: Snoot parses dates using the system locale.**
@@ -70,7 +70,7 @@ git submodule update --init
 ```
 mkdir build
 cd build
-cmake ..
+cmake -DBUILD_TESTING=ON ..
 ```
 
 * Build
@@ -82,8 +82,6 @@ make
 * Run tests
 
 ```
-cmake -DBUILD_TESTING=ON ..
-make
 ctest --output-on-failure
 ```
 

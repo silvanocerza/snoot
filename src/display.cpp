@@ -101,31 +101,32 @@ void Display::printHitsTable() const noexcept {
   cout << "--------------------------------\n";
   cout << setw(25) << left << "Total";
   cout << '|';
-  cout << setw(5) << right << totalHits << "\n\n";
+  cout << setw(5) << right << totalHits << "\n";
 }
 
 // Prints elapsed time, current time, total hits and total traffic from start
 void Display::printGeneralInfo() const noexcept {
-  auto now = time_point_cast<seconds>(system_clock::now());
   cout << "================================\n";
   cout << "          General info          \n";
   cout << "--------------------------------\n";
+  auto now = time_point_cast<seconds>(system_clock::now());
   auto elapsed = duration_cast<seconds>(now - _startTime);
-  cout << setw(20) << left << "Elapsed time: " << date::format("%T", elapsed)
+  cout << setw(25) << left << "Elapsed time: " << date::format("%T", elapsed)
        << '\n';
-  cout << setw(20) << left << "Current time: " << date::format("%F %T", now)
-       << "\n\n";
 
-  cout << setw(20) << left << "Total hits:" << _monitor->totalHits() << '\n';
+  cout << setw(25) << left << "Total hits:" << _monitor->totalHits() << '\n';
   // Traffic in KB
   auto traffic = _monitor->totalTraffic() / 1000.f;
-  cout << setw(20) << left << "Total traffic:" << traffic << "KB\n\n";
+  cout << setw(25) << left << "Total traffic:" << traffic << "KB\n\n";
 
-  cout << setw(20) << left << "Alert threshold: " << _monitor->alertThreshold()
+  cout << setw(25) << left << "Alert threshold: " << _monitor->alertThreshold()
        << " per second\n";
-  cout << setw(20) << left
+  cout << setw(25) << left
        << "Alert duration: " << _monitor->alertDuration().count()
        << " seconds\n";
-  cout << setw(20) << left << "Refresh rate: " << _refreshRate.count()
+  cout << setw(25) << left
+       << "Average hits to alert: " << _monitor->averageHitsToAlert() << " in "
+       << _monitor->alertDuration().count() << " seconds\n";
+  cout << setw(25) << left << "Refresh rate: " << _refreshRate.count()
        << " seconds\n";
 }

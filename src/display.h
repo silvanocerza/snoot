@@ -38,5 +38,5 @@ class Display {
   void printHitsTable() const noexcept;
   void printGeneralInfo() const noexcept;
 
-  static constexpr unsigned int HITS_TABLE_ROWS = 12;
+  static constexpr unsigned int HITS_TABLE_ROWS = 5;
 };
