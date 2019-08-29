@@ -14,7 +14,12 @@ RUN locale-gen
 
 WORKDIR /snoot
 COPY ./ /snoot/
+
 RUN ["git", "submodule", "update", "--init"]
-RUN ["/snoot/build.sh"]
+
+RUN ["cmake", "-DBUILD_TESTING=ON", "."]
+RUN ["make"]
+RUN ["ctest", "--output-on-failure"]
+
 ENTRYPOINT ["/snoot/snoot"]
 

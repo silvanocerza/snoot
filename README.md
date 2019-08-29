@@ -23,7 +23,9 @@ A simple generator is included for testing, to run it:
 Note that the generator might not output enough valid logs to let `Snoot` trigger alerts, in that case either lower the alert threshold with `--threshold` or the alert duration with `--alert-duration`.
 You could also lower, or remove, the `sleep` amount inside `generator.sh`.
 
-**NOTE: Snoot parses dates using the system locale.**
+**NOTE: Snoot parses dates using the system locale.
+If you use the Dockerfile to run it you MUST use `en_US.UTF-8 locale`
+or no date will be parsed.**
 
 
 ## Sample output
@@ -93,7 +95,7 @@ To ease compilation on multiple platforms I've included a Dockerfile to build an
 docker build -t snoot .
 ```
 
-* Run generator in background
+* Run generator in background, **this will generate date using the system locale**, if it's not `en_US.UTF-8` Snoot might not be able to parse dates correctly and no log will appear.
 
 ```
 ./generator >> logFile &
@@ -129,6 +131,13 @@ ctest --output-on-failure
 ```
 
 On Windows you should use Visual Studio after generating its project files with CMake.
+
+* Run Snoot
+
+```
+./path/to/generator.sh >> logFile
+./path/to/snoot -f/path/to/logFile -r1 -t3 -d5
+```
 
 ## Possible improvements
 
