@@ -88,6 +88,10 @@ To circumvent the issue use the included Dockerfile.
 
 To ease compilation on multiple platforms I've included a Dockerfile to build and run Snoot.
 
+* Fetch libraries
+```
+git submodule update --init
+```
 
 * Build the image
 
